@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the user is authenticated and is either Dipu or Meghali
+    function isAuthorizedUser() {
+      return request.auth != null && 
+        (request.auth.token.email.matches('(?i)dipu@studysync.private') || 
+         request.auth.token.email.matches('(?i)meghali@studysync.private'));
+    }
+
+    // Rules for User Profile collection
+    match /users/{userId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Shared YouTube Library
+    match /youtube_videos/{videoId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Syllabus tracking
+    match /syllabus/{chapterId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Collaborative Study Notes
+    match /notes/{noteId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Planner Goals
+    match /planner/{taskId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Pomodoro study sessions
+    match /study_sessions/{sessionId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Mock scores
+    match /mock_tests/{testId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Previous Year Questions
+    match /pyqs/{pyqId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Notifications
+    match /notifications/{notifId} {
+      allow read, write: if isAuthorizedUser();
+    }
+
+    // Rules for Spaced Revisions calendar
+    match /revisions/{revId} {
+      allow read, write: if isAuthorizedUser();
+    }
+  }
+}

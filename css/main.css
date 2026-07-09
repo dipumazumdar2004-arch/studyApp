@@ -1,0 +1,171 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  transition: background var(--transition-normal);
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+}
+
+body.light-theme ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* SPA Base Shell */
+#app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Main Content Area */
+#main-content-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Global Top Header */
+#top-header {
+  height: 70px;
+  min-height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  background: rgba(18, 22, 40, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--panel-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+body.light-theme #top-header {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Page Section View Container */
+.page-view {
+  flex: 1;
+  padding: 30px;
+  opacity: 0;
+  display: none;
+  transform: translateY(20px);
+}
+
+.page-view.active-page {
+  display: block;
+}
+
+/* Global Overlay & Modals styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(5, 6, 12, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Global Toast Notification Container */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 9999;
+}
+
+/* PWA Install Banner & Connection Detector */
+#connection-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-error);
+  z-index: 99999;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-normal);
+}
+
+#connection-banner.offline {
+  transform: scaleX(1);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  #app-shell {
+    grid-template-columns: 1fr;
+  }
+  
+  #sidebar-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    z-index: 999;
+    box-shadow: 20px 0 30px rgba(0, 0, 0, 0.4);
+    transition: transform var(--transition-normal);
+  }
+  
+  #sidebar-panel.active {
+    transform: translateX(0);
+  }
+  
+  #sidebar-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}

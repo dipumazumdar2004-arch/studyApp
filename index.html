@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudySync - Collaborative Exam Prep</title>
+  
+  <!-- PWA & Mobile Optimization -->
+  <meta name="theme-color" content="#08090d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22url(%23g)%22/><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22><stop offset=%220%25%22 stop-color=%22%236366f1%22/><stop offset=%22100%25%22 stop-color=%22%23ec4899%22/></linearGradient></defs><text x=%2217%22 y=%2272%22 fill=%22white%22 font-family=%22Outfit%22 font-size=%2265%22 font-weight=%22800%22>S</text></svg>">
+
+  <!-- Core External Libraries -->
+  <link rel="stylesheet" href="./css/all.min.css">
+  <script src="./js/lib/gsap.min.js"></script>
+  <script src="./js/lib/lottie.min.js"></script>
+  <script src="./js/lib/chart.js"></script>
+  
+  <!-- Application Stylesheets -->
+  <link rel="stylesheet" href="./css/variables.css">
+  <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/pages.css">
+</head>
+<body>
+
+  <!-- Offline status indicator -->
+  <div id="connection-banner"></div>
+
+  <!-- ==========================================
+       LOGIN MODULE OVERLAY (Password-free Local Profiler)
+       ========================================== -->
+  <div id="login-screen">
+    <div class="login-card glass-panel glass-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <div class="logo-icon">S</div>
+          <div class="logo-text" style="margin-left: 8px; font-size: 24px;">StudySync</div>
+        </div>
+        <p class="dash-header-subtitle">Private Collaborative Exam Space</p>
+      </div>
+
+      <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">Select Your Profile to Enter:</p>
+
+      <div class="login-profiles-row" style="margin-bottom: 30px;">
+        <div class="login-profile-select" id="select-profile-dipu" data-username="Dipu">
+          <img class="login-profile-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Dipu" alt="Dipu">
+          <span class="user-presence-name" style="margin-top: 4px;">Dipu</span>
+        </div>
+        <div class="login-profile-select" id="select-profile-meghali" data-username="Meghali">
+          <img class="login-profile-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Meghali" alt="Meghali">
+          <span class="user-presence-name" style="margin-top: 4px;">Meghali</span>
+        </div>
+      </div>
+
+      <button id="btn-login-local" class="btn btn-primary" style="width: 100%;">Access Portal</button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MAIN APP FRAMEWORK
+       ========================================== -->
+  <div id="app-shell" style="display: none;">
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar-panel">
+      <div class="logo-section">
+        <div class="logo-icon">S</div>
+        <span class="logo-text">StudySync</span>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li><a class="sidebar-link active" data-target="dashboard"><i class="fa-solid fa-chart-line"></i>Dashboard</a></li>
+        <li><a class="sidebar-link" data-target="youtube"><i class="fa-brands fa-youtube"></i>YouTube Library</a></li>
+        <li><a class="sidebar-link" data-target="syllabus"><i class="fa-solid fa-list-check"></i>Syllabus Track</a></li>
+        <li><a class="sidebar-link" data-target="notes"><i class="fa-solid fa-file-signature"></i>Study Notes</a></li>
+        <li><a class="sidebar-link" data-target="planner"><i class="fa-solid fa-calendar-days"></i>Daily Planner</a></li>
+        <li><a class="sidebar-link" data-target="timer"><i class="fa-solid fa-hourglass-half"></i>Pomodoro Timer</a></li>
+        <li><a class="sidebar-link" data-target="mocktests"><i class="fa-solid fa-graduation-cap"></i>Mock Tests</a></li>
+        <li><a class="sidebar-link" data-target="pyqs"><i class="fa-solid fa-book-open"></i>PYQ Tracker</a></li>
+        <li><a class="sidebar-link" data-target="analytics"><i class="fa-solid fa-chart-pie"></i>Analytics</a></li>
+
+        <li><a class="sidebar-link" data-target="settings"><i class="fa-solid fa-sliders"></i>Settings</a></li>
+        <li><a class="sidebar-link" data-target="admin"><i class="fa-solid fa-user-shield"></i>Data Manager</a></li>
+      </ul>
+
+      <!-- User profiles presence -->
+      <div class="user-presence-card">
+        <div class="user-presence-row" id="user-me-presence">
+          <div class="user-avatar-wrapper">
+            <img class="user-avatar" id="avatar-me" src="" alt="Me">
+            <div class="status-dot online"></div>
+          </div>
+          <div class="user-presence-info">
+            <span class="user-presence-name" id="name-me">-</span>
+            <span class="user-presence-status">Active (You)</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Frame -->
+    <div id="main-content-container">
+      
+      <!-- Top navbar -->
+      <header id="top-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button id="sidebar-toggle" class="btn btn-glass" style="display: none;"><i class="fa-solid fa-bars"></i></button>
+          <h1 id="page-title-display" style="font-family: var(--font-header); font-size: 22px; font-weight: 700;">Dashboard</h1>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <!-- Quick stats in header -->
+          <div style="display: flex; gap: 12px;" class="hide-mobile">
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+              <i class="fa-solid fa-fire" style="color: var(--color-secondary);"></i>
+              <span id="header-streak-count">0</span> Days
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+              <i class="fa-solid fa-clock" style="color: var(--color-primary);"></i>
+              <span id="header-hours-count">0h</span> Today
+            </div>
+          </div>
+
+          <!-- Theme toggler -->
+          <button id="theme-toggle-btn" class="btn btn-glass" style="padding: 8px; border-radius: 50%;"><i class="fa-solid fa-moon"></i></button>
+          
+          <!-- Sign out -->
+          <button id="btn-signout" class="btn btn-glass" style="padding: 8px; border-radius: 50%;"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+      </header>
+
+      <!-- ==========================================
+           PAGES CONTAINER
+           ========================================== -->
+      <main style="position: relative; flex: 1;">
+        
+        <!-- PAGE: Dashboard -->
+        <div id="page-dashboard" class="page-view active-page"></div>
+
+        <!-- PAGE: YouTube Library -->
+        <div id="page-youtube" class="page-view"></div>
+
+        <!-- PAGE: Syllabus Track -->
+        <div id="page-syllabus" class="page-view"></div>
+
+        <!-- PAGE: Study Notes -->
+        <div id="page-notes" class="page-view"></div>
+
+        <!-- PAGE: Daily Planner -->
+        <div id="page-planner" class="page-view"></div>
+
+        <!-- PAGE: Pomodoro Timer -->
+        <div id="page-timer" class="page-view"></div>
+
+        <!-- PAGE: Mock Tests -->
+        <div id="page-mocktests" class="page-view"></div>
+
+        <!-- PAGE: PYQ Tracker -->
+        <div id="page-pyqs" class="page-view"></div>
+
+        <!-- PAGE: Analytics -->
+        <div id="page-analytics" class="page-view"></div>
+
+
+
+        <!-- PAGE: Settings -->
+        <div id="page-settings" class="page-view"></div>
+
+        <!-- PAGE: Admin/Data Panel -->
+        <div id="page-admin" class="page-view"></div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL OVERLAYS
+       ========================================== -->
+  
+  <!-- Add Video Modal -->
+  <div id="modal-add-video" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Share New YouTube Video</h3>
+        <button class="modal-close" onclick="document.getElementById('modal-add-video').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-add-video">
+        <div class="form-group">
+          <label class="form-label" for="video-url">YouTube Link</label>
+          <input class="form-input" type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="video-subject">Subject Category</label>
+          <select class="form-input" id="video-subject" required>
+            <option value="Quantitative Aptitude">Quantitative Aptitude</option>
+            <option value="Reasoning">Reasoning</option>
+            <option value="English Language">English Language</option>
+            <option value="General Awareness">General Awareness</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="video-tags">Tags (comma separated)</label>
+          <input class="form-input" type="text" id="video-tags" placeholder="geometry, profit-loss, 2026">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Import Video</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Goal Modal -->
+  <div id="modal-add-task" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Create New Goal</h3>
+        <button class="modal-close" onclick="document.getElementById('modal-add-task').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-add-task">
+        <div class="form-group">
+          <label class="form-label" for="task-title-input">Goal Title</label>
+          <input class="form-input" type="text" id="task-title-input" placeholder="e.g. Solve 50 Quant Geometry questions" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="task-type-select">Duration Scope</label>
+          <select class="form-input" id="task-type-select" required>
+            <option value="daily">Daily Target</option>
+            <option value="weekly">Weekly Target</option>
+            <option value="monthly">Monthly Target</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="task-priority-select">Priority</label>
+          <select class="form-input" id="task-priority-select" required>
+            <option value="High">High Priority</option>
+            <option value="Medium" selected>Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="task-assignee-select">Assignee</label>
+          <select class="form-input" id="task-assignee-select" required>
+            <option value="Dipu">Dipu</option>
+            <option value="Meghali">Meghali</option>
+            <option value="Both" selected>Both Users</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="task-date-input">Target Due Date</label>
+          <input class="form-input" type="date" id="task-date-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Create Goal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Mock Score Modal -->
+  <div id="modal-add-mock" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Log Mock Test Score</h3>
+        <button class="modal-close" onclick="document.getElementById('modal-add-mock').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-add-mock">
+        <div class="form-group">
+          <label class="form-label" for="mock-name">Mock Test Name</label>
+          <input class="form-input" type="text" id="mock-name" placeholder="e.g. SSC CGL Mock Test 12" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="mock-subject">Subject</label>
+          <select class="form-input" id="mock-subject" required>
+            <option value="Quantitative Aptitude">Quantitative Aptitude</option>
+            <option value="Reasoning">Reasoning</option>
+            <option value="English Language">English Language</option>
+            <option value="General Awareness">General Awareness</option>
+            <option value="Full Mock Test">Full Mock Test</option>
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="mock-marks-obt">Obtained Marks</label>
+            <input class="form-input" type="number" id="mock-marks-obt" placeholder="140" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="mock-marks-max">Maximum Marks</label>
+            <input class="form-input" type="number" id="mock-marks-max" placeholder="200" required>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="mock-accuracy">Accuracy (%)</label>
+            <input class="form-input" type="number" min="0" max="100" id="mock-accuracy" placeholder="85" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="mock-wrongs">Incorrect Attempts</label>
+            <input class="form-input" type="number" id="mock-wrongs" placeholder="6" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="mock-time">Time Taken (minutes)</label>
+          <input class="form-input" type="number" id="mock-time" placeholder="60" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Log Performance</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add PYQ Modal -->
+  <div id="modal-add-pyq" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Track PYQ Topic</h3>
+        <button class="modal-close" onclick="document.getElementById('modal-add-pyq').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-add-pyq">
+        <div class="form-group">
+          <label class="form-label" for="pyq-in-subject">Subject</label>
+          <select class="form-input" id="pyq-in-subject" required>
+            <option value="Quantitative Aptitude">Quantitative Aptitude</option>
+            <option value="Reasoning">Reasoning</option>
+            <option value="English Language">English Language</option>
+            <option value="General Awareness">General Awareness</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pyq-in-chapter">Topic / Chapter</label>
+          <input class="form-input" type="text" id="pyq-in-chapter" placeholder="e.g. Geometry - Triangles Congruency" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pyq-in-year">Exam Year</label>
+          <input class="form-input" type="number" min="2010" max="2026" id="pyq-in-year" placeholder="2024" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pyq-in-difficulty">Difficulty Level</label>
+          <select class="form-input" id="pyq-in-difficulty" required>
+            <option value="Easy">Easy</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Add PYQ Topic</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Toast Notifications Container -->
+  <div id="toast-container"></div>
+
+  <!-- Bootstrapping Script -->
+  <script src="./js/app.js"></script>
+</body>
+</html>
